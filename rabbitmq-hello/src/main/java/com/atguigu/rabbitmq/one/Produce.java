@@ -10,6 +10,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author huajieli
  * @create 2021-07-25-15:27
+ * 生产者测试类
  */
 public class Produce {
     //队列名称
@@ -48,7 +49,7 @@ public class Produce {
          *
          *
          */
-        channel.basicPublish(null,QUEUE_NAME,null,message.getBytes());
+        channel.basicPublish("",QUEUE_NAME,null,message.getBytes());
         System.out.println("发送消息完毕！");
     }
 }
