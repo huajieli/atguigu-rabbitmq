@@ -38,7 +38,9 @@ public class Work03 {
         };
 
         //使用不公平分发，默认是轮询
-        int prefetchCount = 1;
+        // int prefetchCount = 1;
+        //欲取值
+        int prefetchCount = 2;
         channel.basicQos(prefetchCount);
         //手动应答
         boolean autoAck = false;
