@@ -21,7 +21,7 @@ public class Consumer {
 
         //函数式接口的回调函数
         DeliverCallback deliverCallback = (consumerTag,message)->{
-            System.out.println(new String(message.getBody()));
+            System.out.println("这是消费的消息："+new String(message.getBody()));
         };
         //取消消息时的回调
         CancelCallback cancelCallback = consumerTag->{
