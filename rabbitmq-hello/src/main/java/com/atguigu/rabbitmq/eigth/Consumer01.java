@@ -17,13 +17,21 @@ import java.util.Map;
  * 消费者01
  */
 public class Consumer01 {
-    //普通交换机
+    /**
+     * 普通交换机
+     */
     private static final String NORMAL_EXCHANGE = "normal_exchange";
-    //死信交换机
+    /**
+     * 死信交换机
+     */
     private static final String DEAD_EXCHANGE = "dead_exchange";
-    //普通队列
+    /**
+     * 普通队列
+     */
     private static final String NORMAL_QUEUE = "normal_queue";
-    //死信队列
+    /**
+     * 死信队列
+     */
     private static final String DEAD_QUEUE = "dead_queue";
 
     public static void main(String[] args) throws Exception {
@@ -41,6 +49,8 @@ public class Consumer01 {
         Map<String, Object> mapParams = new HashMap<>();
         mapParams.put("x-dead-letter-exchange", DEAD_EXCHANGE);
         mapParams.put("x-dead-letter-routing-key", "lisi");
+        //队列中存放消息的个数,当队列中积压超过6个后,会进入死信队列
+        mapParams.put("x-max-length",6);
         channel.queueDeclare(NORMAL_QUEUE, false, false, false, mapParams);
 
         //普通队列绑定普通交换机
@@ -48,7 +58,7 @@ public class Consumer01 {
         //死信队列绑定死信交换机
         channel.queueBind(DEAD_QUEUE, DEAD_EXCHANGE, "lisi");
 
-        System.out.println("Consumer01等待接受消息，把接收消息打印在屏幕上......");
+        System.out.println("Consumer01等待接受消息，会把接收消息打印在下面的屏幕上......");
 
         //接受消息时的回调
         DeliverCallback deliverCallback = (consumerTag, message) -> {
