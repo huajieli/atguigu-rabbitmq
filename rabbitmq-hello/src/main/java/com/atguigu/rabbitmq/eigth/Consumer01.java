@@ -61,14 +61,25 @@ public class Consumer01 {
         System.out.println("Consumer01等待接受消息，会把接收消息打印在下面的屏幕上......");
 
         //接受消息时的回调
+       /* DeliverCallback deliverCallback = (consumerTag, message) -> {
+            System.out.println("控制台Consumer01打印接收到的消息：" + new String(message.getBody(), StandardCharsets.UTF_8));
+        };*/
+        //消息因拒绝而进入到死信队列
         DeliverCallback deliverCallback = (consumerTag, message) -> {
+            String msg = new String(message.getBody(), StandardCharsets.UTF_8);
+            if(msg.equals("info5")){
+                channel.basicReject(message.getEnvelope().getDeliveryTag(),false);
+                System.out.println("被拒绝的消息：" + new String(message.getBody(), StandardCharsets.UTF_8));
+            }
             System.out.println("控制台Consumer01打印接收到的消息：" + new String(message.getBody(), StandardCharsets.UTF_8));
         };
         //取消消息时的回调
         CancelCallback cancelCallback = consumerTag -> {
             System.out.println("消息消费被中断");
         };
-        channel.basicConsume(NORMAL_QUEUE, true, deliverCallback, cancelCallback);
+        //channel.basicConsume(NORMAL_QUEUE, true, deliverCallback, cancelCallback);
+        //不可开启自动应答（第二个参数设置成false）
+        channel.basicConsume(NORMAL_QUEUE, false, deliverCallback, cancelCallback);
     }
 
 }
