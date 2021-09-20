@@ -37,6 +37,12 @@ public class TtlQueueConfig {
     public static final String QD_DEAD_QUEUE = "QD";
 
     /**
+     * 对于过期时间扩展性差的问题
+     * 普通队列QC
+     */
+    public static final String QC_QUEUE = "QC";
+
+    /**
      * 声明X_EXCHANGE
      */
     @Bean("xExchange")
@@ -58,7 +64,7 @@ public class TtlQueueConfig {
      */
     @Bean("queueA")
     public Queue queueA() {
-        Map<String, Object> paramsMap = new HashMap();
+        Map<String, Object> paramsMap = new HashMap(3);
         //设置队列的死信交换机
         paramsMap.put("x-dead-letter-exchange", Y_DEAD_EXCHANGE);
         //设置死信队列RoutingKey
@@ -85,6 +91,20 @@ public class TtlQueueConfig {
     }
 
     /**
+     * 声明普通队列QB
+     * 不设置ttl时间,解决扩展性差的问题
+     */
+    @Bean("queueC")
+    public Queue queueC() {
+        Map<String, Object> paramsMap = new HashMap(3);
+        //设置队列的死信交换机
+        paramsMap.put("x-dead-letter-exchange", Y_DEAD_EXCHANGE);
+        //设置死信队列RoutingKey
+        paramsMap.put("x-dead-letter-routing-key", "YD");
+        return QueueBuilder.durable(QC_QUEUE).withArguments(paramsMap).build();
+    }
+
+    /**
      * 死信队列QD
      */
     @Bean("queueD")
@@ -108,6 +128,14 @@ public class TtlQueueConfig {
     @Bean
     public Binding queueBBindingX(@Qualifier("queueB") Queue queueB, @Qualifier("xExchange") DirectExchange xExchange) {
         return BindingBuilder.bind(queueB).to(xExchange).with("XB");
+    }
+    /**
+     * 绑定QC->EX
+     * 使用注解注入要绑定的队列和交换机
+     */
+    @Bean
+    public Binding queueCBindingX(@Qualifier("queueC") Queue queueC, @Qualifier("xExchange") DirectExchange xExchange) {
+        return BindingBuilder.bind(queueC).to(xExchange).with("XC");
     }
     /**
      * 绑定QD->EY
