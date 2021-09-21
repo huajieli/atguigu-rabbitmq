@@ -1,5 +1,6 @@
 package com.huajieli.rabbitmq.springbootrabbitmq.controller;
 
+import com.huajieli.rabbitmq.springbootrabbitmq.config.DelayedQueueConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,10 @@ public class SendMessageController {
      * 普通交换机X
      */
     public static final String X_EXCHANGE = "X";
+    /**
+     * 基于插件的交换机
+     * 直接引用DelayQueueConfig中定义的
+     */
 
     @GetMapping("/sendMessage/{message}")
     public void sendMsg(@PathVariable String message){
@@ -35,6 +40,12 @@ public class SendMessageController {
         rabbitTemplate.convertAndSend(X_EXCHANGE,"XA","消息来自10s的ttl:"+message);
         rabbitTemplate.convertAndSend(X_EXCHANGE,"XB","消息来自40s的ttl:"+message);
     }
+
+    /**
+     * 自定义过期时间
+     * @param message
+     * @param ttlTime
+     */
     @GetMapping("sendExpirationMsg/{message}/{ttlTime}")
     public void sendMsg(@PathVariable String message,@PathVariable String ttlTime) {
         rabbitTemplate.convertAndSend(X_EXCHANGE, "XC", message, correlationData ->{
@@ -42,6 +53,20 @@ public class SendMessageController {
         return correlationData;
     });
         log.info("当前时间：{},发送一条时长{}毫秒 TTL 信息给队列 C:{}", new Date(),ttlTime, message);
+    }
+
+    /**
+     * 自定义过期时间（基于插件）
+     * @param message
+     * @param ttlTime
+     */
+    @GetMapping("sendDelayMsg/{message}/{ttlTime}")
+    public void sendDelayMsg(@PathVariable String message,@PathVariable Integer ttlTime){
+        log.info("当前时间：{},发送一条时长{}毫秒 TTL 信息给队列delayed.queue:{}", new Date(),ttlTime, message);
+        rabbitTemplate.convertAndSend(DelayedQueueConfig.DELAYED_EXCHANGE_NAME, DelayedQueueConfig.DELAYED_ROUTING_KEY,message, msg -> {
+            msg.getMessageProperties().setDelay(ttlTime);
+            return msg;
+        });
     }
 
 
